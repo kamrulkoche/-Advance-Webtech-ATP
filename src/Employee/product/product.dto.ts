@@ -24,6 +24,8 @@ export class UpdateProductForm {
 
     @IsNotEmpty()
     name: string;
+    @IsNotEmpty()
+    price: string;
     employeeid: number;
     
 

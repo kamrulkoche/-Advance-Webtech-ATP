@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Param, Post, Delete, Put, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, NotFoundException, ParseIntPipe, Res, Session, UseGuards, UnauthorizedException, Patch, } from '@nestjs/common';
 import { EmployeeService } from './employeeservice.service';
-import { EmployeeDTO, EmployeeLoginDTO, EmployeeUpdateDTO, EmployeeVarifyPassDTO, } from './employeeform.dto';
+import { EmployeeDTO, EmployeeLoginDTO, EmployeeUpdateDTO, EmployeeUpdatePassDTO, EmployeeVarifyPassDTO, profileDTO, } from './employeeform.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
-import { EmployeeEntity } from './employee.entity';
+import { EmployeeEntity, chatwithmechanic } from './employee.entity';
 import { ProductForm, UpdateProductForm } from './product/product.dto';
 import { ProductService } from './product/product.service';
 import { SessionGuard } from './session.gaurd';
@@ -55,6 +55,7 @@ export class EmployeeController {
 
     // ------------------- Employee Signin Related Routes [Start] ---------------------//
     @Post('/signin')
+    @UsePipes(new ValidationPipe)
     async signIn(@Body() data: EmployeeLoginDTO, @Session() session): Promise<any> {
         if (await this.employeeService.signIn(data)) {
             session.email = data.email;
@@ -72,6 +73,43 @@ export class EmployeeController {
 
 
 
+    // ------------------- Employee forgetPassword Routes [Start] ---------------------//
+    // pin sent to email with smtp service
+    @Post("/forgetPassword")
+    @UsePipes(new ValidationPipe())
+    forgetPassword(@Body() acc: any): any {
+        return this.employeeService.forgetPassword(acc);
+    }
+
+    // varify the varification pin and reset password (forgetpassword)
+    @Patch("/varifyPass")
+    varifyPass(@Body() employee: EmployeeVarifyPassDTO): any {
+        return this.employeeService.varifyPass(employee);
+    }
+    // ------------------- Employee forgetPassword Routes [End] ---------------------//
+
+    //update password
+    @Patch('/changepass')
+    @UseGuards(SessionGuard)
+    @UsePipes(new ValidationPipe)
+    async updatePass(@Session() session, @Body() data: EmployeeUpdatePassDTO): Promise<any> {
+        const profile = await this.employeeService.getProfile(session.email);
+        const newpass = await this.employeeService.verifyPassword(profile.id, data);
+        if (newpass == true) {
+            if (data.new_password != data.confirm_password) {
+                return "New Password and confirm Password doesn't match";
+            }
+            else {
+                return this.employeeService.changePassword(profile.id, data.confirm_password);
+            }
+        }
+        else {
+            return "Old Password doesnt match";
+        }
+
+    }
+
+
     // ------------------- Employee logout Related Routes [Start] ---------------------//
     @Get('/logout')
     @UseGuards(SessionGuard)
@@ -85,24 +123,18 @@ export class EmployeeController {
     // ------------------- Employee logout Routes [End] ---------------------//
 
 
-    // ------------------- Employee forgetPassword Routes [Start] ---------------------//
-    // pin sent to email with smtp service
-    @Post("/forgetPassword/")
-    @UsePipes(new ValidationPipe())
-    forgetPassword(@Body() acc: any): any {
-        return this.employeeService.forgetPassword(acc);
+
+    @Get('profile')
+    @UseGuards(SessionGuard)
+    getProfile(@Session() session): Promise<any> {
+        return this.employeeService.getProfile(session.email);
     }
 
-    // varify the varification pin and reset password (forgetpassword)
-    @Patch("/varifyPass")
-    varifyPass(@Body() employee: EmployeeVarifyPassDTO): any {
-        return this.employeeService.varifyPass(employee);
-    }
-    // ------------------- Employee forgetPassword Routes [End] ---------------------//
+
 
 
     // ------------------- Employee all Registration Listshow Routes [Start] ---------------------//
-    @Get('/registrationview')
+    @Get('/registrationallview')
     async findAll(): Promise<EmployeeEntity[]> {
         return this.employeeService.findAll();
     }
@@ -134,20 +166,6 @@ export class EmployeeController {
     // ------------------- Employee Id Search By Name Routes [End] ---------------------//
 
 
-    // ------------------- Employee Id Delete Routes [Start] ---------------------//
-    @Delete('/users/:id')
-    @UseGuards(SessionGuard)
-    async delete(@Param('id') id: number, @Session() session): Promise<void> {
-        const deleted = await this.employeeService.delete(id);
-        if (!deleted) {
-            throw new NotFoundException(`User with ID ${id} not found.`);
-        } else {
-            throw new NotFoundException(`User with ID ${id} successful`);
-        }
-    }
-    // ------------------- Employee Id Delete Routes [End] ---------------------//
-
-
     @Put('/updateadmin')
     @UseGuards(SessionGuard)
     @UsePipes(new ValidationPipe())
@@ -169,6 +187,21 @@ export class EmployeeController {
 
 
 
+    // ------------------- Employee Id Delete Routes [Start] ---------------------//
+    @Delete('/users/:id')
+    @UseGuards(SessionGuard)
+    async delete(@Param('id') id: number, @Session() session): Promise<void> {
+        const deleted = await this.employeeService.delete(id);
+        if (!deleted) {
+            throw new NotFoundException(`User with ID ${id} not found.`);
+        } else {
+            throw new NotFoundException(`User with ID ${id} successful`);
+        }
+    }
+    // ------------------- Employee Id Delete Routes [End] ---------------------//
+
+
+
     // ------------------- addproduct  Routes [Start] ---------------------//
     @Post('/addproduct')
     @UseGuards(SessionGuard)
@@ -179,7 +212,7 @@ export class EmployeeController {
     }
 
 
- 
+
     // ------------------- addproduct Routes [End] ---------------------//
 
 
@@ -200,6 +233,16 @@ export class EmployeeController {
 
     // ------------------- findemployeebyproduct Routes [End] ---------------------//
 
+    // -------------------updateproductbyemployee Routes [Start] ---------------------//
+    @Put('/updateproductbyemployee/:id')
+    @UseGuards(SessionGuard)
+    @UsePipes(new ValidationPipe())
+    updateProductbyID(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateProductForm, @Session() session): object {
+        return this.productService.updateProductbyID(id, data);
+    }
+    // -------------------updateproductbyemployee Routes [End] ---------------------//
+
+
 
     //-------------------  deleteproductsbyemployee Routes [Start] ---------------------//
     @Delete('/deleteproductsbyemployee/:id')
@@ -211,14 +254,41 @@ export class EmployeeController {
 
 
 
-    // -------------------updateproductbyemployee Routes [Start] ---------------------//
-    @Put('/updateproductbyemployee/:id')
+    @Post('chatwithmechanic')
     @UseGuards(SessionGuard)
-    @UsePipes(new ValidationPipe())
-    updateProductbyID(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateProductForm, @Session() session): object {
-        return this.productService.updateProductbyID(id, data);
+    async chatWithMechanic(@Session() session, @Body() data: chatwithmechanic): Promise<any> {
+
+        try {
+            const profile = await this.employeeService.getProfile(session.email);
+            return this.employeeService.chatWithMechanic(profile.id, data);
+        }
+        catch {
+            throw new UnauthorizedException("Error")
+        }
+
     }
-    // -------------------updateproductbyemployee Routes [End] ---------------------//
+
+    @Get('chatwithmechanicfddf')
+    @UseGuards(SessionGuard)
+    async getCustomerChat(@Session() session) {
+        const profile = await this.employeeService.getProfile(session.email);
+        return this.employeeService.getCustomerChat(profile.id);
+    }
+
+
+
+    @Post('/addprofile')
+
+    addprofile(@Body() Profile: profileDTO,): any {
+        return this.employeeService.addprofile(Profile);
+    }
+
+    @Get('/getProfileByUser/:id')
+    getProfileByUser(@Param('id', ParseIntPipe) id: number): any {
+        return this.employeeService.getProfileByUser(id);
+    }
+
+
 
 
 

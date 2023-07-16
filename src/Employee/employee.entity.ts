@@ -1,8 +1,10 @@
+import { MechanicEntity, chatwithemployee } from 'src/mechanic/mechanic.entity';
 import { ProductEntity } from './product/product.entity';
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-@Entity('employee')
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToOne, OneToOne } from 'typeorm';
+import { User } from 'src/users/user.entity';
 
-// ------------------- EmployeeEntity Routes [Start] ---------------------//
+
+@Entity('employee')
 export class EmployeeEntity {
     @PrimaryGeneratedColumn()
     id: number;
@@ -32,11 +34,14 @@ export class EmployeeEntity {
     @OneToMany(() => ProductEntity, (product) => product.employee)
     products: ProductEntity[]
     
+    @OneToMany(() => chatwithmechanic, (employee) => employee.sender)
+    employee: chatwithmechanic[]
+    
+    @OneToMany(() => chatwithemployee, (mechanic) => mechanic.receiver)
+    mechanic: chatwithemployee[]
     
 
     
-   
-
     // @Column()
     // birthday: string;
 
@@ -70,5 +75,37 @@ export class EmployeeUpdateEntity {
    
 }
 
+
+
+@Entity('employee_chat')
+export class chatwithmechanic {
+    @PrimaryGeneratedColumn()
+    employee_chat_id: number;
+
+    @Column()
+    message: string;
+
+    @Column({ default: () => 'CURRENT_TIMESTAMP' })
+    createDate: Date;
+
+    @ManyToOne(() => EmployeeEntity, sender => sender.mechanic)
+    sender: EmployeeEntity;
+
+    @ManyToOne(() => MechanicEntity, receiver => receiver.employee)
+    receiver: MechanicEntity;
+
+}
+
+@Entity('Profile')
+export class Profile {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column()
+  Name: string;
+
+  @OneToOne(() => User, (user) => user.profile)
+  info: User;
+}
 
 

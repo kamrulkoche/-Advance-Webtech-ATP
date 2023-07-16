@@ -1,4 +1,4 @@
-import { IsDate, IsEmail, IsInt, IsNotEmpty, IsPhoneNumber, IsString, Length, Matches, } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsPhoneNumber, IsString, Length, Matches, } from 'class-validator';
 
 // ------------------- EmployeeDTO Routes [Start] ---------------------//
 export class EmployeeDTO {
@@ -136,9 +136,11 @@ export class AdminmessageDTO {
 
 
 export class EmployeeLoginDTO {
-  id: number;
-  name: string;
-  email: string;
+  @IsEmail()
+  @IsNotEmpty({message:"Email is Empty"})
+  email:string;
+
+  @IsNotEmpty({ message: 'password Empty' })
   password: string;
 }
 
@@ -151,4 +153,20 @@ export class EmployeeVarifyPassDTO {
 
   @IsNotEmpty()
   password: string
+}
+
+export class EmployeeUpdatePassDTO {
+  @IsNotEmpty()
+  password: string;
+  //@Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/, { message: "Must contain one upper letter,lower letter,digit and special character" })
+  new_password: string;
+  @IsNotEmpty()
+  confirm_password: string;
+
+}
+
+
+export class profileDTO {
+  @IsNotEmpty()
+  Name: string;
 }

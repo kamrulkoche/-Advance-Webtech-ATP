@@ -5,11 +5,12 @@ import { employeeModule } from './Employee/employee.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductModule } from './Employee/product/product.module';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { MechanicModule } from './mechanic/mechanic.module';
+import { UsersModule } from './users/users.module';
 
 
 @Module({
-  imports: [
-    employeeModule, ProductModule,
+  imports: [MechanicModule,employeeModule, ProductModule,UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',

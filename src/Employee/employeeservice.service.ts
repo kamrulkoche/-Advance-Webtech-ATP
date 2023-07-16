@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { EmployeeDTO, EmployeeLoginDTO, EmployeeUpdateDTO, EmployeeVarifyPassDTO, } from './employeeform.dto';
+import { EmployeeDTO, EmployeeLoginDTO, EmployeeUpdateDTO, EmployeeUpdatePassDTO, EmployeeVarifyPassDTO, profileDTO, } from './employeeform.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EmployeeEntity } from './employee.entity';
+import { EmployeeEntity, Profile, chatwithmechanic } from './employee.entity';
 import { Repository } from 'typeorm';
 import { ProductEntity } from './product/product.entity';
 import * as bcrypt from 'bcrypt';
@@ -17,7 +17,11 @@ export class EmployeeService {
   constructor(
     @InjectRepository(EmployeeEntity) private employeeRepo: Repository<EmployeeEntity>,
     @InjectRepository(ProductEntity) private productRepo: Repository<ProductEntity>,
+    @InjectRepository(chatwithmechanic) private customerChatRepo: Repository<chatwithmechanic>,
+    @InjectRepository(Profile) private profilesRepository: Repository<Profile>,
+
     private readonly mailerService: MailerService
+
   ) { }
 
 
@@ -80,31 +84,32 @@ export class EmployeeService {
 
   // ------------------- Employee signup Routes [Start] ---------------------//
   async signup(data: EmployeeDTO): Promise<EmployeeEntity> {
-      const salt = await bcrypt.genSalt();
-      data.password = await bcrypt.hash(data.password, salt);
-      return this.employeeRepo.save(data);
-    
+    const salt = await bcrypt.genSalt();
+    data.password = await bcrypt.hash(data.password, salt);
+    return this.employeeRepo.save(data);
+
   }
   // ------------------- Employee signup Routes [Start] ---------------------//
 
 
   // ------------------- Employee Signin Routes [Start] ---------------------//
   async signIn(data: EmployeeLoginDTO) {
-    try{
-    const userdata = await this.employeeRepo.findOneBy({ email: data.email });
-    if (userdata) {
-      const match: boolean = await bcrypt.compare(data.password, userdata.password);
-      console.log(`${userdata} and ${match}`);
-      return match;
+    try {
+      const userdata = await this.employeeRepo.findOneBy({ email: data.email });
+      if (userdata) {
+        const match: boolean = await bcrypt.compare(data.password, userdata.password);
+        console.log(`${userdata} and ${match}`);
+        return match;
+      }
+      else
+        return false;
     }
-    else
-      return false;}
-      catch (error) { 
-        throw new UnauthorizedException("signIn error enter a proper email or password");
-      }
-        
-      }
-  
+    catch (error) {
+      throw new UnauthorizedException("signIn error enter a proper email or password");
+    }
+
+  }
+
 
 
 
@@ -160,13 +165,6 @@ export class EmployeeService {
 
 
 
-
-
-
-
-
-
-
   // ------------------- findproductbyemployee Routes [Start] ---------------------//
   getProductID(id): any {
     return this.employeeRepo.find({
@@ -197,6 +195,68 @@ export class EmployeeService {
   }
   // ------------------- deleteManagersByAdminID Routes [End] ---------------------//
 
+
+
+  getProfile(email): Promise<any> {
+    return this.employeeRepo.findOneBy({ email: email });
+  }
+
+
+  async chatWithMechanic(id, data: chatwithmechanic): Promise<chatwithmechanic> {
+    data.sender = id;
+    return this.customerChatRepo.save(data);
+  }
+
+
+  async getCustomerChat(id) {
+    return this.customerChatRepo.find({
+      where: { sender: id },
+      relations: {
+        sender: true,
+        receiver: true
+      },
+    });
+  }
+
+  async getMechanicChat(id) {
+    return this.customerChatRepo.find({
+      where: { receiver: id },
+      relations: {
+        sender: true,
+        receiver: true
+      },
+    });
+  }
+
+
+  //verify password
+  async verifyPassword(id, data: EmployeeUpdatePassDTO): Promise<any> {
+    const profile = await this.employeeRepo.findOneBy({ id: id });
+    const isMatch: boolean = await bcrypt.compare(data.password, profile.password);
+    if (isMatch) {
+      return isMatch;
+    }
+    else {
+      return false;
+    }
+  }
+
+
+  //update password
+  async changePassword(id, password): Promise<any> {
+    const pass = await bcrypt.genSalt();
+    password = await bcrypt.hash(password, pass);
+    return this.employeeRepo.update(id, { password: password });
+  }
+
+
+  addprofile(mydto: profileDTO): any {
+    return this.profilesRepository.save(mydto);
+}
+
+getProfileByUser(id): any {
+    return this.profilesRepository.find({ where: { id: id }, relations: { info: true },});
+}
 
 
 }
