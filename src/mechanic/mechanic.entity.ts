@@ -1,6 +1,5 @@
-
-import { AdminEntity, chatwithmechanic } from "src/Admin/admin.entity";
-import { Column,Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, } from "typeorm";
+import { EmployeeEntity, chatwithmechanic } from "src/Employee/employee.entity";
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn,  } from "typeorm";
 
 
 
@@ -9,19 +8,19 @@ export class MechanicEntity {
     @PrimaryGeneratedColumn()
     mechanic_id: number;
     @Column({type: "varchar", length: 150})
-    name: string;
+    mechanic_name: string;
     @Column({ type: "varchar", length: 256, unique: true})
-    email: string;
+     mechanic_email: string;
    
      @Column({ type: "varchar", length: 256 })
-    password: string;
+     mechanic_password: string;
    
 
-    @OneToMany(() => chatwithadmin, chat => chat.sender, { cascade: true })
-    mechanicchats: chatwithadmin[];
+    @OneToMany(() => chatwithemployee, chat => chat.sender, { cascade: true })
+    mechanicchats: chatwithemployee[];
 
     @OneToMany(() => chatwithmechanic, chat => chat.receiver, { cascade: true })
-    admin: chatwithmechanic[];
+    employee: chatwithmechanic[];
 }
 
 
@@ -34,7 +33,7 @@ export class service{
 }
 
 @Entity('mechanic_chat')
-export class chatwithadmin {
+export class chatwithemployee {
     @PrimaryGeneratedColumn()
     mechanic_chat_id: number;
 
@@ -47,8 +46,8 @@ export class chatwithadmin {
     @ManyToOne(() => MechanicEntity, sender => sender.mechanicchats)
     sender: MechanicEntity;
 
-    @ManyToOne(() => AdminEntity, receiver => receiver.mechanic)
-    receiver: AdminEntity;
+    @ManyToOne(() => EmployeeEntity, receiver => receiver.mechanic)
+    receiver: EmployeeEntity;
 }
 
 

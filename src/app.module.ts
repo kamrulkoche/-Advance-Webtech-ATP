@@ -1,26 +1,23 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { employeeModule } from './Employee/employee.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ManagerModule } from './manager/manager.module';
-import { adminModule } from './Admin/admin.module';
+import { ProductModule } from './Employee/product/product.module';
 import { MailerModule } from '@nestjs-modules/mailer';
-import { NewsModule } from './news/news.module';
 import { MechanicModule } from './mechanic/mechanic.module';
 import { UsersModule } from './users/users.module';
 
 
-
 @Module({
-  imports: [
-    adminModule,ManagerModule,NewsModule,MechanicModule,UsersModule,
+  imports: [MechanicModule,employeeModule, ProductModule,UsersModule,
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: 'localhost',
       port: 5432,
       username: 'postgres',
       password: '123',
-      database: 'Adol', //Change to your database name
+      database: 'Employee', //Change to your database name
       autoLoadEntities: true,
       synchronize: true,
     }),
@@ -38,7 +35,8 @@ import { UsersModule } from './users/users.module';
       }
     }),
   ],
+
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

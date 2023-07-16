@@ -14,7 +14,7 @@ export class UsersService {
 
 
 
-  addinfo(mydto: UserDTO): any {
+  insertManager(mydto: UserDTO): any {
     return this.usersRepository.save(mydto);
   }
 

@@ -6,15 +6,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(
     session({
-    secret: 'my-secret',
-    resave: false,
-    saveUninitialized: false,
-    cookie:{
-     maxAge: 300000
-    }
+      secret: 'my-secret',
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        maxAge: 300000000
+      }
     }),
-   );
-   app.enableCors();
+  );
+  app.enableCors();
   await app.listen(3000);
 }
 bootstrap();

@@ -1,19 +1,32 @@
-import { IsEmail, IsIn, IsInt, IsNotEmpty, Matches, MinLength } from "class-validator";
-
+import { IsEmail, IsIn, IsNotEmpty, Matches, } from "class-validator";
 
 
 export class MechanicDTO {
     @Matches(/^[a-zA-Z][a-zA-Z\-\.\s]{2,150}$/, { message: "Only contain a-z or A-Z or dot(.) or dash(-) and must start with a letter and atleast 2 charecter" })
-    name: string;
+    mechanic_name: string;
 
     @IsEmail()
-    email: string;
+    mechanic_email: string;
 
+    // @Matches(/^[0][1][3-9][0-9]{8}$/, { message: "Please enter a valid Phone number" })
+    // mechanic_phone: string;
+
+    // @IsNotEmpty()
+    // mechanic_nid: string;
+
+    // @IsIn(['Male','Female','Others'])
+    // mechanic_gender: string;
+
+    // @IsNotEmpty()
+    // mechanic_address: string;
+
+    @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/, { message: "Password Must contain one upper letter,lower letter,digit and special character" })
+    mechanic_password: string;
     
-    //@Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]*$/, { message: "Password Must contain one upper letter,lower letter,digit and special character" })
-    password: string;
-    
-   
+    // photo: string;
+
+    // @IsIn(['Valid','Invalid','Pending'])
+    // status: string;
 }
 
 

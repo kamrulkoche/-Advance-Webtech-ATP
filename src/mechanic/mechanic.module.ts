@@ -2,12 +2,12 @@ import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { MechanicsController } from "./mechanic.controller";
 import { MechanicService } from "./mechanic.service";
-import { MechanicEntity, chatwithadmin,  } from "./mechanic.entity";
-import { AdminEntity, chatwithmechanic } from "src/Admin/admin.entity";
+import { EmployeeEntity, chatwithmechanic } from "src/Employee/employee.entity";
+import { MechanicEntity, chatwithemployee } from "./mechanic.entity";
 
 
 @Module({
-    imports: [TypeOrmModule.forFeature([MechanicEntity, AdminEntity, chatwithadmin, chatwithmechanic])],
+    imports: [TypeOrmModule.forFeature([MechanicEntity, EmployeeEntity, chatwithemployee, chatwithmechanic])],
     controllers: [MechanicsController],
     providers: [MechanicService],
 })
