@@ -3,7 +3,7 @@ import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { UserDTO } from './userform.dto';
 
-@Controller('employee')
+@Controller('admin')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
@@ -13,8 +13,8 @@ export class UsersController {
   }
 
   @Post('/addinfo')
-  insertManager(@Body() user: UserDTO,): any {
-      return this.usersService.insertManager(user);
+  addinfo(@Body() user: UserDTO,): any {
+      return this.usersService.addinfo(user);
   }
 
 

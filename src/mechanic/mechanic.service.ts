@@ -1,25 +1,25 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { MechanicDTO } from "./mechanic.DTO";
-import { chatwithemployee, MechanicEntity } from "./mechanic.entity";
+import { MechanicDTO, MechanicLoginDTO, MechanicUpdateDTO, MechanicUpdatePassDTO } from "./mechanic.DTO";
+import { MechanicEntity, chatwithadmin } from "./mechanic.entity";
 import * as bcrypt from 'bcrypt';
 import { Repository } from "typeorm";
-import { EmployeeEntity, chatwithmechanic } from "src/Employee/employee.entity";
+import { chatwithmechanic } from "src/Admin/admin.entity";
 
 @Injectable()
 export class MechanicService {
     constructor(
         @InjectRepository(MechanicEntity) private mechanicRepo: Repository<MechanicEntity>,
-        @InjectRepository(EmployeeEntity) private customerRepo: Repository<EmployeeEntity>,
-        @InjectRepository(chatwithmechanic) private customerChatRepo: Repository<chatwithmechanic>,
-        @InjectRepository(chatwithemployee) private mechanicChatRepo: Repository<chatwithemployee>,
+        @InjectRepository(chatwithmechanic) private adminChatRepo: Repository<chatwithmechanic>,
+        @InjectRepository(chatwithadmin) private mechanicChatRepo: Repository<chatwithadmin>,
 
     ) { }
 
-   
+  
+
     async mechanicRegistration(data: MechanicDTO): Promise<MechanicEntity> {
         const pass = await bcrypt.genSalt();
-        data.mechanic_password = await bcrypt.hash(data.mechanic_password, pass);
+        data.password = await bcrypt.hash(data.password, pass);
         return this.mechanicRepo.save(data);
     }
 
@@ -28,7 +28,7 @@ export class MechanicService {
     
 
 
-    async chatWithCustomer(data: chatwithemployee): Promise<chatwithemployee> {
+    async chatWithCustomer(data: chatwithadmin): Promise<chatwithadmin> {
         //data.sender = id;
         return this.mechanicChatRepo.save(data);
     }
@@ -44,8 +44,8 @@ export class MechanicService {
         });
     }
 
-    async getemployeeChat(id) {
-        return this.customerChatRepo.find({
+    async getadminChat(id) {
+        return this.adminChatRepo.find({
             where: { receiver: id },
             relations: {
                 sender: true,

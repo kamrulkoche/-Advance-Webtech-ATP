@@ -1,4 +1,4 @@
-import { Profile } from 'src/Employee/employee.entity';
+import { Profile } from 'src/Admin/admin.entity';
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne, JoinColumn } from 'typeorm';
 
 
