@@ -1,4 +1,4 @@
-import {IsDate,IsEmail,IsNotEmpty,IsPhoneNumber,IsString,Length,Matches,} from 'class-validator';
+import { IsDate, IsEmail, IsInt, IsNotEmpty, IsPhoneNumber, IsString, Length, Matches, } from 'class-validator';
 
 // ------------------- EmployeeDTO Routes [Start] ---------------------//
 export class EmployeeDTO {
@@ -12,34 +12,33 @@ export class EmployeeDTO {
   @Matches(/^[a-zA-Z]+$/, { message: 'Last name error enter a proper name' })
   lname: string;
 
-  @IsNotEmpty({message:"Gender is Empty"})
-  @IsString({message:"Gender is no string"})
-  @Matches( /^[a-zA-Z]+$/, {message:"Gender  error enter a proper name"})
-  gender:string;
+  @IsNotEmpty({ message: "Gender is Empty" })
+  @IsString({ message: "Gender is no string" })
+  @Matches(/^[a-zA-Z]+$/, { message: "Gender  error enter a proper name" })
+  gender: string;
 
-  @IsEmail({}, { message: "invalid email" })
-    email: string;
+  @IsEmail()
+  @IsNotEmpty({message:"Email is Empty"})
+  @Length(3,100)
+  email:string;
 
-  // @IsNotEmpty({message:"Phone number is Empty"})
-  // @Matches( /^[0-9]+$/, {message:"Phone Number error enter a proper name"})
-  // @Length(0,11)
-    phone: number;
-    password: string;
-    filename:string;
+  @IsNotEmpty({message:"Phone number is Empty"})
+  @Matches( /^[0-9]+$/, {message:"Phone Number error enter a proper name"})
+  @Length(1,11)
+  phone:string;
+
+  @IsNotEmpty({message:"Password Empty"})
+  @IsString({message:" Password is no string"})
+
+  @IsNotEmpty({ message: 'password Empty' })
+  password:string;
+  
+  filename: string;
 
   // @IsDate({message:"Birthday Error"})
   // @IsNotEmpty({message:"Age Empty"})
   // birthday:string;
 
-  // @IsEmail()
-  // @IsNotEmpty({message:"Email is Empty"})
-  // @Length(3,100)
-  // email:string;
-
-  // @IsNotEmpty({message:"Phone number is Empty"})
-  // @Matches( /^[0-9]+$/, {message:"Phone Number error enter a proper name"})
-  // @Length(1,11)
-  // phone:number;
 
   // @IsNotEmpty({message:"Address Empty"})
   // @IsString({message:" Address is no string"})
@@ -104,9 +103,9 @@ export class EmployeeUpdateDTO {
   // confirmpassword:string;
 }
 
-export class EmployeeProfiledeleteDTO {}
+export class EmployeeProfiledeleteDTO { }
 
-export class viewrecordDTO {}
+export class viewrecordDTO { }
 
 export class AddProductDTO {
   @IsNotEmpty({ message: 'Product Name a Empty' })
@@ -128,12 +127,11 @@ export class UpdateProductDTO {
   pprice: string;
 }
 
-export class DeleteproductDTO {}
+export class DeleteproductDTO { }
 
 export class AdminmessageDTO {
   adminmessage: string;
 }
-
 
 
 
@@ -142,5 +140,15 @@ export class EmployeeLoginDTO {
   name: string;
   email: string;
   password: string;
-  }
-  
+}
+
+
+
+export class EmployeeVarifyPassDTO {
+  @IsNotEmpty()
+  @IsInt()
+  pin: number;
+
+  @IsNotEmpty()
+  password: string
+}

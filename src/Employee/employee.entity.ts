@@ -20,7 +20,7 @@ export class EmployeeEntity {
     email:string;
 
     @Column()
-    phone:number;
+    phone:string;
     
     @Column()
     password:string;

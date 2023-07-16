@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, Post, Delete, Put, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, NotFoundException, ParseIntPipe, Res, Session, UseGuards, } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Delete, Put, Query, UploadedFile, UseInterceptors, UsePipes, ValidationPipe, NotFoundException, ParseIntPipe, Res, Session, UseGuards, UnauthorizedException, Patch, } from '@nestjs/common';
 import { EmployeeService } from './employeeservice.service';
-import { EmployeeDTO, EmployeeLoginDTO, EmployeeUpdateDTO, } from './employeeform.dto';
+import { EmployeeDTO, EmployeeLoginDTO, EmployeeUpdateDTO, EmployeeVarifyPassDTO, } from './employeeform.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
 import { EmployeeEntity } from './employee.entity';
@@ -38,10 +38,16 @@ export class EmployeeController {
 
     @UsePipes(new ValidationPipe)
     signup(@Body() mydata: EmployeeDTO, @UploadedFile() imageobj: Express.Multer.File) {
-        console.log(mydata);
-        console.log(imageobj.filename);
-        mydata.filename = imageobj.filename;
-        return this.employeeService.signup(mydata);
+        // console.log(mydata);
+        // console.log(imageobj.filename);
+        try {
+            mydata.filename = imageobj.filename;
+            return this.employeeService.signup(mydata);
+        }
+        catch {
+            // return "Email not found!";
+            throw new UnauthorizedException("Your Input has error");
+        }
     }
     // ------------------- Employee Registration Related Routes [End] ---------------------//
 
@@ -52,16 +58,47 @@ export class EmployeeController {
     async signIn(@Body() data: EmployeeLoginDTO, @Session() session): Promise<any> {
         if (await this.employeeService.signIn(data)) {
             session.email = data.email;
-            return true;
+            return "Successfully login";
+            //return true;
         }
         else {
 
-            return false;
+            return "Incorrect Email or Password  ";
+            //return false;
         }
 
     }
     // ------------------- Employee Signin Related Routes [End] ---------------------//
 
+
+
+    // ------------------- Employee logout Related Routes [Start] ---------------------//
+    @Get('/logout')
+    @UseGuards(SessionGuard)
+    logout(@Session() session) {
+        if (session.destroy())
+            return { message: "Logged out successful" };
+
+        else
+            throw new UnauthorizedException("invalid actions");
+    }
+    // ------------------- Employee logout Routes [End] ---------------------//
+
+
+    // ------------------- Employee forgetPassword Routes [Start] ---------------------//
+    // pin sent to email with smtp service
+    @Post("/forgetPassword/")
+    @UsePipes(new ValidationPipe())
+    forgetPassword(@Body() acc: any): any {
+        return this.employeeService.forgetPassword(acc);
+    }
+
+    // varify the varification pin and reset password (forgetpassword)
+    @Patch("/varifyPass")
+    varifyPass(@Body() employee: EmployeeVarifyPassDTO): any {
+        return this.employeeService.varifyPass(employee);
+    }
+    // ------------------- Employee forgetPassword Routes [End] ---------------------//
 
 
     // ------------------- Employee all Registration Listshow Routes [Start] ---------------------//
@@ -99,7 +136,8 @@ export class EmployeeController {
 
     // ------------------- Employee Id Delete Routes [Start] ---------------------//
     @Delete('/users/:id')
-    async delete(@Param('id') id: number): Promise<void> {
+    @UseGuards(SessionGuard)
+    async delete(@Param('id') id: number, @Session() session): Promise<void> {
         const deleted = await this.employeeService.delete(id);
         if (!deleted) {
             throw new NotFoundException(`User with ID ${id} not found.`);
@@ -112,7 +150,7 @@ export class EmployeeController {
 
     @Put('/updateadmin')
     @UseGuards(SessionGuard)
-    //@UsePipes(new ValidationPipe())
+    @UsePipes(new ValidationPipe())
     updateAdmin(@Body() data: EmployeeUpdateDTO, @Session() session): object {
         console.log(session.email);
         return this.employeeService.updateEmployee(session.email, data);
@@ -120,14 +158,11 @@ export class EmployeeController {
 
 
 
-
-
-
-
     // ------------------- Employee updateemployeeById Routes [Start] ---------------------//
     @Put('/updateemployee/:id')
+    @UseGuards(SessionGuard)
     @UsePipes(new ValidationPipe())
-    updateAdminbyID(@Param('id', ParseIntPipe) id: number, @Body() data: EmployeeUpdateDTO): any {
+    updateAdminbyID(@Param('id', ParseIntPipe) id: number, @Body() data: EmployeeUpdateDTO, @Session() session): any {
         return this.employeeService.updateEmployeeById(id, data);
     }
     // ------------------- Employee updateemployeeById Routes [End] ---------------------//
@@ -136,10 +171,15 @@ export class EmployeeController {
 
     // ------------------- addproduct  Routes [Start] ---------------------//
     @Post('/addproduct')
+    @UseGuards(SessionGuard)
     @UsePipes(new ValidationPipe())
-    insertProduct(@Body() productdto: ProductForm): any {
+    insertProduct(@Body() productdto: ProductForm, @Session() session): any {
+
         return this.productService.insertProduct(productdto);
     }
+
+
+ 
     // ------------------- addproduct Routes [End] ---------------------//
 
 
@@ -163,7 +203,8 @@ export class EmployeeController {
 
     //-------------------  deleteproductsbyemployee Routes [Start] ---------------------//
     @Delete('/deleteproductsbyemployee/:id')
-    deleteProductByemployeeID(@Param('id', ParseIntPipe) id: number): any {
+    @UseGuards(SessionGuard)
+    deleteProductByemployeeID(@Param('id', ParseIntPipe) id: number, @Session() session): any {
         return this.employeeService.deleteProductsByEmployeeID(id);
     }
     // ------------------- deleteproductsbyemployee Routes [End] ---------------------//
@@ -172,11 +213,9 @@ export class EmployeeController {
 
     // -------------------updateproductbyemployee Routes [Start] ---------------------//
     @Put('/updateproductbyemployee/:id')
+    @UseGuards(SessionGuard)
     @UsePipes(new ValidationPipe())
-    updateProductbyID(
-        @Param('id', ParseIntPipe) id: number,
-        @Body() data: UpdateProductForm,
-    ): object {
+    updateProductbyID(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateProductForm, @Session() session): object {
         return this.productService.updateProductbyID(id, data);
     }
     // -------------------updateproductbyemployee Routes [End] ---------------------//

@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { ProductForm, UpdateProductForm } from "./product.dto";
 import { ProductEntity } from "./product.entity";
 
-
 @Injectable()
 export class ProductService {
     constructor(
@@ -14,7 +13,6 @@ export class ProductService {
 
 
     insertProduct(mydto:ProductForm):any {
-    
    return this.productRepo.save(mydto);
       }
       getProductID(id):any {
@@ -25,6 +23,7 @@ export class ProductService {
             },
          });
     }
+  
 
 
 
@@ -37,9 +36,6 @@ export class ProductService {
             },
          });
     }
-
-
-
 
      // -------------------updateProductbyID Routes [Start] ---------------------//
   async updateProductbyID(

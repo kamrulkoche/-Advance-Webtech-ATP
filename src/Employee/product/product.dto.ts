@@ -3,18 +3,16 @@ import { IsNotEmpty, IsInt, Length, IsEmail } from "class-validator";
 export class ProductForm {
 
 
-    @IsNotEmpty()
+    @IsNotEmpty({ message: 'product Name Empty' })
     name: string;
 
-    // @IsEmail()
-    // email: string;
+    @IsNotEmpty({ message: 'price Empty' })
+    price: string;
+    
+    // @IsNotEmpty({ message: 'price Empty' })
+    // employee: string;
 
-    // @Length(3, 8)
-    // password: string;
-
-
-    // address: string;
-
+    //@IsNotEmpty({ message: 'employeeid Empty' })
     employeeid: number;
 
 
@@ -26,8 +24,6 @@ export class UpdateProductForm {
 
     @IsNotEmpty()
     name: string;
-
-   
     employeeid: number;
     
 
